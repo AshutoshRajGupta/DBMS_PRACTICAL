@@ -1,480 +1,666 @@
-import sys,sqlite3,time
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QTableWidgetItem,QTableWidget,QComboBox,QVBoxLayout,QGridLayout,QDialog,QWidget, \
-QPushButton, QApplication, QMainWindow,QAction,QMessageBox,QLabel,QTextEdit,QProgressBar,QLineEdit, QHBoxLayout
-from PyQt5.QtCore import QCoreApplication
+from tkinter import *
+from tkinter import messagebox
+from tkinter import scrolledtext
 
-class DBHelper():
-    def _init_(self):
-        self.conn=sqlite3.connect("sdms.db")
-        self.c=self.conn.cursor()
-        self.c.execute("CREATE TABLE IF NOT EXISTS student(sid INTEGER,Sname TEXT,dept INTEGER,year INTEGER,course_a INTEGER,course_b INTEGER,course_c INTEGER)")
-        self.c.execute("CREATE TABLE IF NOT EXISTS faculty(fid INTEGER,f_name TEXT,course INTEGER,dept INTEGER,class_room INTEGER)")
-        self.c.execute("CREATE TABLE IF NOT EXISTS Course(cid INTEGER,c_name INTEGER,faculty TEXT,credit INTEGER,type INTEGER,slot INTEGER,No_enrolled INTEGER)")
+root=Tk()
+root.title("SMS")
+root.geometry('600x400+400+150')
 
-    def addStudent(self,sid ,Sname ,dept ,year ,course_a ,course_b ,course_c ):
-        try:
-            self.c.execute("INSERT INTO student(sid ,Sname ,dept ,year ,course_a ,course_b ,course_c) VALUES (?,?,?,?,?,?,?)",(sid ,Sname ,dept ,year ,course_a ,course_b ,course_c))
-            self.conn.commit()
-            self.c.close()
-            self.conn.close()
-            QMessageBox.information(QMessageBox(),'Successful','Student is added successfully to the database.')
-        except Exception:
-            QMessageBox.warning(QMessageBox(), 'Error', 'Could not add student to the database.')
+frame1 = Frame(root)
+frame2 = Frame(root)
+frame1.pack(side=TOP,fill=X)  # side='top' is default
+frame2.pack(side='top',fill=X)
 
-    def searchStudent(self,sid):
-       
-        self.c.execute("SELECT * from student WHERE sid="+str(sid))
-        self.data=self.c.fetchone()
-
-        if not self.data:
-            QMessageBox.warning(QMessageBox(), 'Error', 'Could not find any student with roll no '+str(sid))
-            return None
-        self.list=[]
-        for i in range(0,7):
-            self.list.append(self.data[i])
-        self.c.close()
-        self.conn.close()
-        showStudent(self.list)
-
-    def deleteRecord(self,sid):
-        try:
-            self.c.execute("DELETE from student WHERE sid="+str(sid))
-            self.conn.commit()
-            self.c.close()
-            self.conn.close()
-            QMessageBox.information(QMessageBox(),'Successful','Student is deleted from the database.')
-        except Exception:
-            QMessageBox.warning(QMessageBox(), 'Error', 'Could not delete student from the database.')
-
-        
-
-class Login(QDialog):
-    def _init_(self, parent=None):
-        super(Login, self)._init_(parent)
-        self.userNameLabel=QLabel("Username")
-        self.userPassLabel=QLabel("Password")
-        self.textName = QLineEdit(self)
-        self.textPass = QLineEdit(self)
-        self.buttonLogin = QPushButton('Login', self)
-        self.buttonLogin.clicked.connect(self.handleLogin)
-        layout = QGridLayout(self)
-        layout.addWidget(self.userNameLabel, 1, 1)
-        layout.addWidget(self.userPassLabel, 2, 1)
-        layout.addWidget(self.textName,1,2)
-        layout.addWidget(self.textPass,2,2)
-        layout.addWidget(self.buttonLogin,3,1,1,2)
-
-        self.setWindowTitle("Login")
+def f1():
+	#global sonal
+	#if sonal==True:
+		print("hello")
+		root.withdraw()
+		addEmp.deiconify()
+		entEid.focus()
+		print(addEmp.deiconify())
+		
+		print("yes")
+		print("helo")
+		#collectEid=addEmp.register(checkEid)
+		#entEid.config(validate="key",validatecommand=(collectEid,'%P'))
+		
+	
 
 
-    def handleLogin(self):
-        if (self.textName.text() == '' and
-            self.textPass.text() == ''):
-            self.accept()
-        else:
-            QMessageBox.warning(
-                self, 'Error', 'Bad user or password')
+def entEidOp():
+	if  (eid.isdigit()):
+		messagebox.showerror("ValueError","Please Enter Positive Number") 
+		entEid.delete(0,END)	
+		entEid.focus()
+	else :
+		entEname.focus()
+		
+
+def btnViewOp():
+	import cx_Oracle
+	con=None
+	cursor=None
+
+	try:
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connected")
+		cursor=con.cursor()
+		sql='select eid,ename,emarks from sms'
+		cursor.execute(sql)
+		data=cursor.fetchall()
+		mdata='' ''
+		for d in data:
+			mdata=mdata+str(d[0])+" "+d[1]+ " "+str(d[2])+"\n"
+		st.insert(INSERT,mdata)
+	except cx_OracleDatabaseError as e:
+		print("Issue :",e )
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
+	viewEmp.deiconify()
+	root.withdraw()
+
+def btnUpdateOp():
+	root.withdraw()
+	updateEmp.deiconify()
+	entEid2.focus()
+
+def btnDeleteOp():
+	deleteEmp.deiconify()
+	root.withdraw()
+	entEid3.focus()
+
+def btnGraphOp():
+	graphEmp.deiconify()
+	root.withdraw()
 
 
-def showStudent(list):
-    sid=0
-    dept = ""
-    year = ""
-    sname = ""
-    course_a = ""
-    course_b = ""
-    course_c = ""
+#sonal=True
+btnAdd=Button(frame1,text="Add",width=20,command=f1)
+btnView=Button(frame1,text="View",width=20,command=btnViewOp)
+btnUpdate=Button(frame1,text="Update",width=20, command=btnUpdateOp)
+btnDelete=Button(frame1,text="Delete",width=20, command=btnDeleteOp)
+btnGraph=Button(frame1,text="Graph",width=20,command=btnGraphOp)
+btnAdd.pack(pady=10)
+btnView.pack(pady=10)
+btnUpdate.pack(pady=10)
+btnDelete.pack(pady=10)
+btnGraph.pack(pady=10)
 
-    sid=list[0]
-    sname=list[1]
+import socket
+import requests
+try:
+	city="Mumbai"
+	socket.create_connection(("www.google.com",80))
+	a1="http://api.openweathermap.org/data/2.5/weather?units=metric"
+	a2="&q="+city
+	a3="&appid=c6e315d09197cec231495138183954bd"
+	api_address=a1+a2+a3
+	res1=requests.get(api_address)
+	j1=res1.json()
+	d1=j1['main']
+	temp=d1['temp']
+	lblTemp=Label(frame1,text="Temperature = ")
+	lblTemp.pack(side=LEFT)
+	#lblTemp.grid(row=30,column=0)
+	lblTempAns=Label(frame1,text=temp)
+	lblTempAns.pack(side=LEFT)
+	#lblTempAns.grid(row=30,column=1)
+except OSError:
+	print("Check network")
 
-    if list[2]==0:
-        dept="Mechanical Engineering"
-    elif list[2]==1:
-        dept="Chemical Engineering"
-    elif list[2]==2:
-        dept="Software Engineering"
-    elif list[2]==3:
-        dept="Biotech Engineering"
-    elif list[2]==4:
-        dept="Computer Science and Engineering"
-    elif list[2]==5:
-        dept="Information Technology"
+import random
 
-    if list[3]==0:
-        year="1st"
-    elif list[3]==1:
-        year="2nd"
-    elif list[3]==2:
-        year="3rd"
-    elif list[3]==3:
-        year="4th"
+msg=["Love not Hate","Laughter is bets medicine","Never stop looking up","Vow to stop worring and start learning"]
+r=random.randrange(len(msg))
 
-    if list[4]==0:
-        course_a="DBMS"
-    elif list[4]==1:
-        course_a="OS"
-    elif list[4]==2:
-        course_a="CN"
-    elif list[4]==3:
-        course_a="C++"
-    elif list[4]==4:
-        course_a="JAVA"
-    elif list[4]==5:
-        course_a="PYTHON"
-    elif list[4]==6:
-        course_a="THERMO"
-    elif list[4]==7:
-        course_a="MACHINE"
-    elif list[4]==8:
-        course_a="CELLS"
-    elif list[4]==9:
-        course_a="DS"
-    elif list[4]==10:
-        course_a="CRE"
-    elif list[4]==11:
-        course_a="MICROBES"
-    elif list[4]==12:
-        course_a="FERTILIZER"
+quote=Label(frame2,text="Quote = ")
+quote.pack(side=LEFT,pady=10)
+quotemsg=Label(frame2,text=msg[r])
+quotemsg.pack(side=LEFT)
 
-    if list[5]==0:
-        course_b="DBMS"
-    elif list[5]==1:
-        course_b="OS"
-    elif list[5]==2:
-        course_b="CN"
-    elif list[5]==3:
-        course_b="C++"
-    elif list[5]==4:
-        course_b="JAVA"
-    elif list[5]==5:
-        course_b="PYTHON"
-    elif list[5]==6:
-        course_b="THERMO"
-    elif list[5]==7:
-        course_b="MACHINE"
-    elif list[5]==8:
-        course_b="CELLS"
-    elif list[5]==9:
-        course_b="DS"
-    elif list[5]==10:
-        course_b="CRE"
-    elif list[5]==11:
-        course_b="MICROBES"
-    elif list[5]==12:
-        course_b="FERTILIZER"
+addEmp=Toplevel(root)
+addEmp.title("Add S")
+addEmp.geometry('600x400+400+150')
+addEmp.withdraw()
+lblEid=Label(addEmp,text='Enter Roll no.')
+lblEid.pack(pady=10)
+def checkEid(empeid):
+	if empeid.isdigit():
+		print(empeid)
+		return True
+	elif empeid is "" :
+		print(empeid)
+		return True
+	else :
+		print(empeid)
+		messagebox.showerror("ValueError","You Entered :"+" "+str(empeid)+"\n"+"Please Enter Integer")
+		entEid.config(validate="none")
+		entEid.delete(0,END)
+		entEid.config(validate="key")
+		entEid.focus()
+		return False	
+entEid=Entry(addEmp,bd=5)
+entEid.focus()
+entEid.pack(pady=10)
+collectEid1=addEmp.register(checkEid)
+entEid.config(validate="key",validatecommand=(collectEid1,'%P'))
 
-    if list[6]==0:
-        course_c="DBMS"
-    elif list[6]==1:
-        course_c="OS"
-    elif list[6]==2:
-        course_c="CN"
-    elif list[6]==3:
-        course_c="C++"
-    elif list[6]==4:
-        course_c="JAVA"
-    elif list[6]==5:
-        course_c="PYTHON"
-    elif list[6]==6:
-        course_c="THERMO"
-    elif list[6]==7:
-        course_c="MACHINE"
-    elif list[6]==8:
-        course_c="CELLS"
-    elif list[6]==9:
-        course_c="DS"
-    elif list[6]==10:
-        course_c="CRE"
-    elif list[6]==11:
-        course_c="MICROBES"
-    elif list[6]==12:
-        course_c="FERTILIZER"
-    elif list[6]==13:
-        course_c="PLANTS"
-    elif list[6]==14:
-        course_c="MOBLIE APP"
+def checkEname(empename):
+	whatineid=entEid.get()
+	if whatineid=="":
+		messagebox.showerror("Empty","Student id Should not be Empty")
+		entEid.focus()
+		return False
+	elif empename.isalpha() :
+		print(empename)
+		return True
+	elif empename is "" :
+		print(empename)
+		return True
+	else :
+		print(empename)
+		messagebox.showerror("ValueError","You Entered :"+" "+empename+"\n"+"Please Enter String")
+		entEname.config(validate="none")
+		entEname.delete(0,END)
+		entEname.config(validate="key")
+		entEname.focus()
+		return False
+	
+	
+			
+			
+	
+lblEname=Label(addEmp,text="Enter Name")
+entEname=Entry(addEmp,bd=5)
+collectEname=addEmp.register(checkEname)
+entEname.config(validate="key",validatecommand=(collectEname,'%P'))
 
+def checkMarks(empmarks):
+	lenEname=entEname.get()
+	try:
+		em=int(empmarks)
+	except ValueError:
+		print()
+	if len(lenEname)<2:	
+		messagebox.showerror("Length","Length of Student Name is less than 2")
+		entEname.focus()
+		return False
+	
+	elif empmarks.isdigit() and (em>=0 and em<=100) :
+		print(empmarks)
+		return True
+	elif empmarks is "" :
+		print(empmarks)
+		return True
+	else :
 
-    table=QTableWidget()
-    tableItem=QTableWidgetItem()
-    table.setWindowTitle("Student Details")
-    table.setRowCount(7)
-    table.setColumnCount(2)
+		print(empmarks)
+		messagebox.showerror("ValueError","You Entered :"+" "+str(empmarks)+"\n"+"Please Enter Digits Between 0-100")
+		entMarks.config(validate="none")
+		entMarks.delete(0,END)
+		entMarks.config(validate="key")
+		entMarks.focus()
+		return False	
 
-    table.setItem(0, 0, QTableWidgetItem("Roll"))
-    table.setItem(0, 1, QTableWidgetItem(str(sid)))
-    table.setItem(1, 0, QTableWidgetItem("Name"))
-    table.setItem(1, 1, QTableWidgetItem(str(sname)))
-    table.setItem(2, 0, QTableWidgetItem("Department"))
-    table.setItem(2, 1, QTableWidgetItem(str(dept)))
-    table.setItem(3, 0, QTableWidgetItem("Year"))
-    table.setItem(3, 1, QTableWidgetItem(str(year)))
-    table.setItem(4, 0, QTableWidgetItem("Slot A"))
-    table.setItem(4, 1, QTableWidgetItem(str(course_a)))
-    table.setItem(5, 0, QTableWidgetItem("Slot B"))
-    table.setItem(5, 1, QTableWidgetItem(str(course_b)))
-    table.setItem(6, 0, QTableWidgetItem("Slot C"))
-    table.setItem(6, 1, QTableWidgetItem(str(course_c)))
-    table.horizontalHeader().setStretchLastSection(True)
-    table.show()
-    dialog=QDialog()
-    dialog.setWindowTitle("Student Details")
-    dialog.resize(500,300)
-    dialog.setLayout(QVBoxLayout())
-    dialog.layout().addWidget(table)
-    dialog.exec()
+	
+	
+	
+lblMarks=Label(addEmp,text="Enter Marks")
+entMarks=Entry(addEmp,bd=5)
+collectMarks=addEmp.register(checkMarks)
+entMarks.config(validate="key",validatecommand=(collectMarks,"%P"))
 
+lblEname.pack(pady=10)
+entEname.pack(pady=10)
+lblMarks.pack(pady=10)
+entMarks.pack(pady=10)
+	
+def SaveOp():
+	import cx_Oracle
+	con=None
+	cursor=None
+	
+	try:
+			
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connectd")
+		cursor=con.cursor()
+		sql="insert into sms values('%d','%s','%d')"	
+		try:	
+			eid1= int(entEid.get())
+		except ValueError:
+			messagebox.showerror("Empty","Student id Field is Empty")
+			entEid.focus()
+		try:		
+			ename1=entEname.get()
+		except ValueError:
+			messagebox.showerror("Empty","Student name Field is Empty")
+		try:	
+			emarks1=int(entMarks.get())
+		except ValueError:
+			messagebox.showerror("Empty","Student marks Field is Empty")
+			entMarks.focus()
+		args=(eid1,ename1,emarks1)
+		cursor.execute(sql%args)
+		con.commit()
+		msg=str(cursor.rowcount)+"Records Inserted"
+		messagebox.showinfo("Success", msg)
+		entEid.config(validate="none")
+		entEid.delete(0,END)
+		entEid.config(validate="key")
+		entEname.config(validate="none")
+		entMarks.config(validate='none')	
+		entEname.delete(0,END)
+		entEname.config(validate="key")		
+		entMarks.config(validate='key')
+		entMarks.config(validate="none")		
+		entMarks.delete(0,END)
+		entMarks.config(validate="key")
+		entEid.focus()
+	except cx_Oracle.DatabaseError as e:
+		con.rollback()
+		messagebox.showerror("Failure","There are 2 possibilities :"+"\n"+"please Correct it "+"\n"+"Student id is already exist or Student name Field is empty")
+		entEname.focus()
+	except UnboundLocalError as e:
+		print()
+		#messagebox.showerror("Failure",e)
+	except cx_Oracle.IntegrityError as e:
+		messagebox.showerror("Failure","Student name Field is empty")		
+	
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
+def addBackOp():
+	entEid.config(validate="none")
+	entEid.delete(0,END)
+	entEid.config(validate="key")
+	entEname.config(validate="none")
+	entEname.delete(0,END)
+	entEname.config(validate="key")
+	entMarks.config(validate="none")
+	entMarks.delete(0,END)
+	entMarks.config(validate="key")
+	root.deiconify()
+	addEmp.withdraw()
+		
 
-class AddStudent(QDialog):
-    def _init_(self):
-        super()._init_()
+btnSave=Button(addEmp,text='Save',command=SaveOp)
+btnBack=Button(addEmp,text='Back', command=addBackOp)
 
-        self.dept=-1
-        self.year=-1
-        self.sid=-1
-        self.sname=""
-        self.course_a=-1
-        self.course_b=-1
-        self.course_c=-1
+btnSave.pack(pady=10)
+btnBack.pack(pady=10)
 
-        self.btnCancel=QPushButton("Cancel",self)
-        self.btnReset=QPushButton("Reset",self)
-        self.btnAdd=QPushButton("Add",self)
-
-        self.btnCancel.setFixedHeight(30)
-        self.btnReset.setFixedHeight(30)
-        self.btnAdd.setFixedHeight(30)
-
-        self.yearCombo=QComboBox(self)
-        self.yearCombo.addItem("1st")
-        self.yearCombo.addItem("2nd")
-        self.yearCombo.addItem("3rd")
-        self.yearCombo.addItem("4th")      
-
-        self.branchCombo = QComboBox(self)
-        self.branchCombo.addItem("Mechanical")
-        self.branchCombo.addItem("Chemical")
-        self.branchCombo.addItem("Software")
-        self.branchCombo.addItem("Biotech")
-        self.branchCombo.addItem("Computer Science")
-        self.branchCombo.addItem("Information Technology")
-
-        self.cACombo = QComboBox(self)
-        self.cACombo.addItem("DBMS")
-        self.cACombo.addItem("OS")
-        self.cACombo.addItem("CN")
-        self.cACombo.addItem("C++")
-        self.cACombo.addItem("JAVA")
-        self.cACombo.addItem("PYTHON")
-        self.cACombo.addItem("THERMO")
-        self.cACombo.addItem("MACHINE")
-        self.cACombo.addItem("CELLS")
-        self.cACombo.addItem("DS")
-        self.cACombo.addItem("CRE")
-        self.cACombo.addItem("MICROBES")
-        self.cACombo.addItem("FERTILIZER")
-        self.cACombo.addItem("PLANTS")
-
-        self.cBCombo = QComboBox(self)
-        self.cBCombo.addItem("DBMS")
-        self.cBCombo.addItem("OS")
-        self.cBCombo.addItem("CN")
-        self.cBCombo.addItem("C++")
-        self.cBCombo.addItem("JAVA")
-        self.cBCombo.addItem("PYTHON")
-        self.cBCombo.addItem("THERMO")
-        self.cBCombo.addItem("MACHINE")
-        self.cBCombo.addItem("CELLS")
-        self.cBCombo.addItem("DS")
-        self.cBCombo.addItem("CRE")
-        self.cBCombo.addItem("MICROBES")
-        self.cBCombo.addItem("FERTILIZER")
-        self.cBCombo.addItem("PLANTS")
-
-        self.cCCombo = QComboBox(self)
-        self.cCCombo.addItem("DBMS")
-        self.cCCombo.addItem("OS")
-        self.cCCombo.addItem("CN")
-        self.cCCombo.addItem("C++")
-        self.cCCombo.addItem("JAVA")
-        self.cCCombo.addItem("PYTHON")
-        self.cCCombo.addItem("THERMO")
-        self.cCCombo.addItem("MACHINE")
-        self.cCCombo.addItem("CELLS")
-        self.cCCombo.addItem("DS")
-        self.cCCombo.addItem("CRE")
-        self.cCCombo.addItem("MICROBES")
-        self.cCCombo.addItem("FERTILIZER")
-        self.cCCombo.addItem("PLANTS")
-        self.cCCombo.addItem("MOBILE APP")
-
-        self.rollLabel=QLabel("Roll No")
-        self.nameLabel=QLabel("Name")
-        self.cALabel = QLabel("Slot A")
-        self.yearLabel = QLabel("Current Year")
-        self.cBLabel = QLabel("Slot B")
-        self.branchLabel = QLabel("Branch")
-        self.cCLabel=QLabel("Slot C")
-   
-        self.rollText=QLineEdit(self)
-        self.nameText=QLineEdit(self)
-
-        self.grid=QGridLayout(self)
-        self.grid.addWidget(self.rollLabel,1,1)
-        self.grid.addWidget(self.nameLabel,2,1)
-        self.grid.addWidget(self.yearLabel, 3, 1)
-        self.grid.addWidget(self.branchLabel, 4, 1)
-        self.grid.addWidget(self.cALabel, 5, 1)
-        self.grid.addWidget(self.cBLabel, 6, 1)
-        self.grid.addWidget(self.cCLabel,7,1)
-        
-        self.grid.addWidget(self.rollText,1,2)
-        self.grid.addWidget(self.nameText,2,2)
-        self.grid.addWidget(self.yearCombo, 3, 2)
-        self.grid.addWidget(self.branchCombo, 4, 2)
-        self.grid.addWidget(self.cACombo, 5, 2)
-        self.grid.addWidget(self.cBCombo, 6, 2)
-        self.grid.addWidget(self.cCCombo,7,2)
-       
-        self.grid.addWidget(self.btnReset,9,1)
-        self.grid.addWidget(self.btnCancel,9,3)
-        self.grid.addWidget(self.btnAdd,9,2)
-
-        self.btnAdd.clicked.connect(self.addStudent)
-        self.btnCancel.clicked.connect(self.Close)
-        self.btnReset.clicked.connect(self.reset)
-        
-        self.setLayout(self.grid)
-        self.setWindowTitle("Add Student Details")
-        self.resize(500,300)
-
-    def Close(self):
-        self.close()
-
-    def reset(self):
-        self.rollText.setText("")
-        self.nameText.setText("")
-        
-    def addStudent(self):
-        self.year=self.yearCombo.currentIndex()
-        self.dept=self.branchCombo.currentIndex()
-        self.sid=int(self.rollText.text())
-        self.sname=self.nameText.text()
-        self.course_a=self.cACombo.currentIndex()
-        self.course_b=self.cBCombo.currentIndex()
-        self.course_c=self.cCCombo.currentIndex()
-
-        self.dbhelper=DBHelper()
-        self.dbhelper.addStudent(self.sid,self.sname,self.dept ,self.year ,self.course_a ,self.course_b ,self.course_c )
+viewEmp=Toplevel(root)
+viewEmp.title("View S")
+viewEmp.geometry('600x400+400+150')
+viewEmp.withdraw()
 
 
-class Window(QMainWindow):
-    def _init_(self):
-        super()._init_()
-        self.rollToBeSearched=0
-        self.vbox = QVBoxLayout()
-        self.text = QLabel("Enter the roll no of the student")
-        self.editField = QLineEdit()
-        self.btnSearch = QPushButton("Search", self)
-        self.btnSearch.clicked.connect(self.showStudent)
-        self.vbox.addWidget(self.text)
-        self.vbox.addWidget(self.editField)
-        self.vbox.addWidget(self.btnSearch)
-        self.dialog = QDialog()
-        self.dialog.setWindowTitle("Enter Roll No")
-        self.dialog.setLayout(self.vbox)
 
-        self.rollForDelete = 0
-        self.vboxDelete = QVBoxLayout()
-        self.textDelete = QLabel("Enter the roll no of the student")
-        self.editFieldDelete = QLineEdit()
-        self.btnSearchDelete = QPushButton("Search", self)
-        self.btnSearchDelete.clicked.connect(self.deleteRecord)                       
-        self.vboxDelete.addWidget(self.textDelete)
-        self.vboxDelete.addWidget(self.editFieldDelete)
-        self.vboxDelete.addWidget(self.btnSearchDelete)
-        self.dialogDelete = QDialog()
-        self.dialogDelete.setWindowTitle("Delete Record")
-        self.dialogDelete.setLayout(self.vboxDelete)
+def viewBackOp():
+	st.delete('1.0',END)
+	viewEmp.withdraw()
+	root.deiconify()
 
-        layout = QGridLayout() # Using a GridLayout to allow the widget to be resized 
+st=scrolledtext.ScrolledText(viewEmp,width=30,height=5)
+btnViewBack=Button(viewEmp,text="Back",command=viewBackOp)
 
-        self.btnEnterStudent=QPushButton("Enter Student Details",self)
-        self.btnShowStudentDetails=QPushButton("Show Student Details",self)
-        self.btnDeleteRecord=QPushButton("Delete record",self)
+st.pack(pady=10)
+btnViewBack.pack(pady=10)
 
-        self.picLabel=QLabel(self)
-        self.picLabel.resize(150,150)
-        self.picLabel.move(120,10)
-        self.picLabel.setScaledContents(True)
-        self.picLabel.setPixmap(QtGui.QPixmap("user.png"))
-        layout.addWidget(self.picLabel, 0, 0) # Choose row and column for every widget
+updateEmp=Toplevel(root)
+updateEmp.title("Update S")
+updateEmp.geometry('600x400+400+150')
+updateEmp.withdraw()
+lblEid2=Label(updateEmp,text='Enter Roll no.')
+lblEid2.pack(pady=10)
+def checkEid2(empeid2):
+	if empeid2.isdigit():
+		print(empeid2)
+		return True
+	elif empeid2 is "" :
+		print(empeid2)
+		return True
+	else :
+		print(empeid2)
+		messagebox.showerror("ValueError","You Entered :"+" "+str(empeid2)+"\n"+"Please Enter String")
+		entEid2.config(validate="none")
+		entEid2.delete(0,END)
+		entEid2.config(validate="key")
+		entEid2.focus()
+		return False	
+entEid2=Entry(updateEmp,bd=5)
+entEid2.focus()
+entEid2.pack(pady=10)
+collectEid2=updateEmp.register(checkEid2)
+entEid2.config(validate="key",validatecommand=(collectEid2,'%P'))
 
-        self.btnEnterStudent.move(15,170)
-        self.btnEnterStudent.resize(180,40)
-        self.btnEnterStudentFont=self.btnEnterStudent.font()
-        self.btnEnterStudentFont.setPointSize(13)
-        self.btnEnterStudent.setFont(self.btnEnterStudentFont)
-        self.btnEnterStudent.clicked.connect(self.enterstudent)
-        layout.addWidget(self.btnEnterStudent, 1, 0) 
+def checkEname2(empename2):
+	whatineid=entEid2.get()
+	if whatineid=="":
+		messagebox.showerror("Empty","Student id Should not be Empty")
+		entEid2.focus()
+		return False
+	elif empename2.isalpha() :
+		print(empename2)
+		return True
+	elif empename2 is "" :
+		print(empename2)
+		return True
+	else :
+		print(empename2)
+		messagebox.showerror("ValueError","You Entered :"+" "+empename2+"\n"+"Please Enter String")
+		entEname2.config(validate="none")
+		entEname2.delete(0,END)
+		entEname2.config(validate="key")
+		entEname2.focus()
+		return False
+	
+	
+			
+			
+	
+lblEname2=Label(updateEmp,text="Enter Name")
+entEname2=Entry(updateEmp,bd=5)
+collectEname2=updateEmp.register(checkEname2)
+entEname2.config(validate="key",validatecommand=(collectEname2,'%P'))
 
-        self.btnDeleteRecord.move(205,170)
-        self.btnDeleteRecord.resize(180, 40)
-        self.btnDeleteRecordFont = self.btnEnterStudent.font()
-        self.btnDeleteRecordFont.setPointSize(13)
-        self.btnDeleteRecord.setFont(self.btnDeleteRecordFont)
+def checkMarks2(empmarks2):
+	lenEname2=entEname2.get()
+	try:
+		em2=int(empmarks2)
+	except ValueError:
+		print()
+	if len(lenEname2)<2:	
+		messagebox.showerror("Length","Length of Student Name is less than 2")
+		entEname2.focus()
+		return False
+	
+	elif empmarks2.isdigit() and (em2>=0 and em2<=100) :
+		print(empmarks2)
+		return True
+	elif empmarks2 is "" :
+		print(empmarks2)
+		return True
+	else :
 
-        self.btnDeleteRecord.clicked.connect(self.showDeleteDialog)  
-        layout.addWidget(self.btnDeleteRecord, 1, 1)                                 #2222
+		print(empmarks2)
+		messagebox.showerror("ValueError","You Entered :"+" "+str(empmarks2)+"\n"+"Please Enter Digits Between 0-100")
+		entMarks2.config(validate="none")
+		entMarks2.delete(0,END)
+		entMarks2.config(validate="key")
+		entMarks2.focus()
+		return False	
+
+	
+	
+	
+lblMarks2=Label(updateEmp,text="Enter Marks")
+entMarks2=Entry(updateEmp,bd=5)
+collectMarks2=updateEmp.register(checkMarks2)
+entMarks2.config(validate="key",validatecommand=(collectMarks2,"%P"))
+
+lblEname2.pack(pady=10)
+entEname2.pack(pady=10)
+lblMarks2.pack(pady=10)
+entMarks2.pack(pady=10)
+	
+def updateSaveOp():
+	import cx_Oracle
+	con=None
+	cursor=None
+	
+	try:
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connectd")
+		cursor=con.cursor()
+		sql="update sms set ename='%s' , emarks='%d' where eid='%d' "
+		
+		try:
+			eid=int(entEid2.get())
+		except ValueError:
+			messagebox.showerror("Empty","Student id Field is Empty")
+			entEid2.focus()
+		ename=entEname2.get()
+		try:
+			emarks=int(entMarks2.get())
+		except ValueError:
+			messagebox.showerror("Empty","Student marks Field is Empty")
+			entMarks2.focus()
+		args=(ename,emarks,eid)
+		cursor.execute(sql%args)
+		con.commit()
+		msg=str(cursor.rowcount)+"Records Updated"
+		messagebox.showinfo("Success", msg)
+		entEid2.config(validate="none")
+		entEid2.delete(0,END)
+		entEid2.config(validate="key")
+		entEname2.config(validate="none")
+		entMarks2.config(validate='none')
+		entEname2.delete(0,END)
+		entEname2.config(validate="key")
+		entMarks2.config(validate='key')	
+		entMarks2.config(validate="none")
+		entMarks2.delete(0,END)
+		entMarks2.config(validate="key")
+		entEid2.focus()
+	except cx_Oracle.DatabaseError as e:
+		con.rollback()
+		messagebox.showerror("Failure","Student name Field is Empty")
+		entEname2.focus()
+	except UnboundLocalError as e:
+		print()
+		#messagebox.showerror("Failure",e)
+		
+	
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
+def updateBackOp():
+	entEid2.config(validate="none")
+	entEid2.delete(0,END)
+	entEid2.config(validate="key")
+	entEname2.config(validate="none")
+	entMarks2.config(validate='none')
+	entEname2.delete(0,END)
+	entEname2.config(validate="key")
+	entMarks2.config(validate='key')
+	entMarks2.config(validate="none")
+	entMarks2.delete(0,END)
+	entMarks2.config(validate="key")
+	root.deiconify()
+	updateEmp.withdraw()
+		
+
+btnSave2=Button(updateEmp,text='Save',command=updateSaveOp)
+btnBack2=Button(updateEmp,text='Back', command=updateBackOp)
+
+btnSave2.pack(pady=10)
+btnBack2.pack(pady=10)
+
+deleteEmp=Toplevel(root)
+deleteEmp.title("Delete S")
+deleteEmp.geometry('600x400+400+150')
+deleteEmp.withdraw()
+lblEid3=Label(deleteEmp,text='Enter Roll no.')
+lblEid3.pack(pady=10)
+def checkEid3(empeid3):
+	if empeid3.isdigit():
+		print(empeid3)
+		return True
+	elif empeid3 is "" :
+		print(empeid3)
+		return True
+	else :
+		print(empeid3)
+		messagebox.showerror("ValueError","You Entered :"+" "+str(empeid3)+"\n"+"Please Enter String")
+		entEid3.config(validate="none")
+		entEid3.delete(0,END)
+		entEid3.config(validate="key")
+		entEid3.focus()
+		return False	
+entEid3=Entry(deleteEmp,bd=5)
+entEid3.focus()
+entEid3.pack(pady=10)
+collectEid3=updateEmp.register(checkEid3)
+entEid3.config(validate="key",validatecommand=(collectEid3,'%P'))
 
 
-        self.btnShowStudentDetails.move(15, 220)
-        self.btnShowStudentDetails.resize(180, 40)
-        self.btnShowStudentDetailsFont = self.btnEnterStudent.font()
-        self.btnShowStudentDetailsFont.setPointSize(13)
-        self.btnShowStudentDetails.setFont(self.btnShowStudentDetailsFont)
-        self.btnShowStudentDetails.clicked.connect(self.showStudentDialog)
-        layout.addWidget(self.btnShowStudentDetails, 2, 0)
-        
-        w = QWidget()
-        w.setLayout(layout)
-        self.setCentralWidget(w) # setting the layout to central window
+def deleteSaveOp():
+	import cx_Oracle
+	con=None
+	cursor=None
+	
+	try:
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connectd")
+		cursor=con.cursor()
+		sql="delete from sms where eid='%d' "
+		
+		try:
+			eid=int(entEid3.get())
+		except ValueError:
+			messagebox.showerror("Empty","Student id Field is Empty")
+			entEid3.focus()
+			
+		args=(eid)
+		cursor.execute(sql%args)
+		con.commit()
+		msg=str(cursor.rowcount)+"Records Deleted"
+		messagebox.showinfo("Success", msg)
+		entEid3.config(validate="none")
+		entEid3.delete(0,END)
+		entEid3.config(validate="key")
+		entEid3.focus()
+	except cx_Oracle.DatabaseError as e:
+		con.rollback()
+		messagebox.showerror("Failure",e)
+	except UnboundLocalError as e:
+		print()
+		
+	
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
+def deleteBackOp():
+	entEid3.config(validate="none")
+	entEid3.delete(0,END)
+	entEid3.config(validate="key")
+	root.deiconify()
+	deleteEmp.withdraw()
 
-        self.setFixedSize(400,280)
-        self.setWindowTitle("Student Database Management System")
+btnSave3=Button(deleteEmp,text='Save',command=deleteSaveOp)
+btnBack3=Button(deleteEmp,text='Back', command=deleteBackOp)
 
-    def enterstudent(self):
-        enterStudent=AddStudent()
-        enterStudent.exec()
+btnSave3.pack(pady=10)
+btnBack3.pack(pady=10)
 
-    def showStudentDialog(self):
-        self.dialog.exec()
+graphEmp=Toplevel(root)
+graphEmp.title("Graph M")
+graphEmp.geometry('600x400+400+150')
+graphEmp.withdraw()
 
-    def showDeleteDialog(self):
-        self.dialogDelete.exec()
-    
-    def showStudent(self):
-        if self.editField.text() is "":
-            QMessageBox.warning(QMessageBox(), 'Error','You must give the roll number to show the results for.')
-            return None
-        showstudent = DBHelper()
-        showstudent.searchStudent(int(self.editField.text()))
+def graphLineOp():
+	import cx_Oracle
+	con=None
+	cursor=None
 
-    def deleteRecord(self):
-        if self.editField.text() is "":
-            QMessageBox.warning(QMessageBox(), 'Error','You must give the roll number to show the results for.')
-            return None
-        delrecord = DBHelper()
-        delrecord.deleteRecord(int(self.editFieldDelete.text()))
+	try:
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connected")
+		cursor=con.cursor()
+		sql='select eid,ename,emarks from sms'
+		cursor.execute(sql)
+		data=cursor.fetchall()
+		ename=[]
+		emark1=[]
+		print("Total number of row count :",cursor.rowcount)
+		for d in data:
+			ename.append(d[1])
+			emark1.append(d[2])
+		print(ename)
+		print(emark1)	
+	except cx_OracleDatabaseError as e:
+		print("Issue :",e )
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
+	
+
+	from matplotlib import pyplot as plt
+	plt.plot(ename,emark1,label="Mark")
+	plt.title("Exam Score")
+	plt.xlabel("Students Name")
+	plt.ylabel("Marks")
+	#plt.legend(loc="upper right",shadow=True)
+	plt.grid()
+	plt.show()
+
+def graphBarOp():
+	import cx_Oracle
+	con=None
+	cursor=None
+
+	try:
+		con=cx_Oracle.connect("system/abc123")
+		print("U R Connected")
+		cursor=con.cursor()
+		sql='select eid,ename,emarks from sms'
+		cursor.execute(sql)
+		data=cursor.fetchall()
+		ename1=[]
+		emark1=[]
+		print("Total number of row count :",cursor.rowcount)
+		for d in data:
+			ename1.append(d[1])
+			emark1.append(d[2])
+		print(ename1)
+		print(emark1)	
+	except cx_OracleDatabaseError as e:
+		print("Issue :",e )
+	finally:
+		if cursor is not None:
+			cursor.close()
+		if con is not None:
+			con.close()
 
 
-if _name_ == '_main_':
-    app = QApplication(sys.argv)
-    login = Login()
+	import matplotlib.pyplot as plt
+	import numpy as np
+	x=np.arange(len(ename1))
+	emark2=[10,25,32,67,32,55,80,43,21,77,32]
+	plt.bar(x,emark1,label="Mark",color='y') #alpha=0.8
+	plt.xticks(x,ename1,fontsize=5)
+	plt.title("Exam Score")
+	plt.xlabel("Students Name",fontsize=15)
+	plt.ylabel("Marks",fontsize=15)
+	#plt.legend(loc="upper right",shadow=True)
+	plt.grid()
+	plt.show()
 
-    if login.exec_() == QDialog.Accepted:
-        window = Window()
-        window.show()
-    sys.exit(app.exec_())
+def graphBackOp():
+	root.deiconify()
+	graphEmp.withdraw()
+	
+
+btnLine=Button(graphEmp,text='Line',command=graphLineOp)
+btnBar=Button(graphEmp,text='Bar', command=graphBarOp)
+btnGraphBack=Button(graphEmp,text='Back',command=graphBackOp)
+
+btnLine.pack(ipadx=10,ipady=5,pady=15)
+btnBar.pack(ipadx=12,ipady=5)
+btnGraphBack.pack(ipadx=10,ipady=5,pady=15)
+
+root.mainloop()
